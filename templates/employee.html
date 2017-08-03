@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>{{employee.fname}} {{employee.lname}}</h1>
+  <hr>
+  <div>
+    <h3>{{employee.address}}</h3>
+  </div>
+  <div>
+    <h3>{{employee.city}}, {{employee.state}} {{employee.zipcode}}</h3>
+  </div>
+  <div>
+    <h3>{{employee.phonenumber}} {{employee.email}} </h3>
+  </div>
+  <div>
+    <h3>{{employee.comments | safe}}</h3>
+  </div>
+{% endblock %}

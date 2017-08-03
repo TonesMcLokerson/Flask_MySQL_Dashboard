@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>{{event.account}}     {{event.program}}</h1>
+  <hr>
+  <a class="btn btn-default" href="/edit_event/{{event.id}}">Edit Event</a>
+  <div>
+    <h3>Event Date</h3>
+    <h4>{{event.event_date}}, {{event.event_time}} - {{event.end_time}}</h4>
+  </div>
+  <div>
+  <h3>Samplers</h3>
+    <h4>{{event.sampler1}}, {{event.sampler2}}</h4>
+  </div>
+  <div>
+  <h3>Team lead?</h3>
+    <h4>{{event.teamlead}}</h4>
+  </div>
+  <div>
+  <h3>Comments</h3>
+    <h4>{{event.comments | safe}}</h4>
+  </div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>{{account.accountname}}</h1>
+  <hr>
+  <div>
+    <h3>{{account.accountaddress}}</h3>
+  </div>
+  <div>
+    <h3>{{account.accountcity}}</h3>
+  </div>
+  <div>
+    <h3>{{account.accountcomments | safe}}</h3>
+  </div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Events</h1>
+  <a class="btn btn-success" href="/add_event">Add Event</a>
+  <hr>
+<table class="table table-striped">
+		<tr>
+			<th>ID</th>
+			<th>Account</th>
+			<th>Program</th>
+			<th>Date</th>
+			<th></th>
+			<th></th>
+		</tr>
+		{% for event in events %}
+		<tr>
+			<td>{{event.id}}</td>
+			<td><a href="event/{{event.id}}">{{event.account}}</a></td>
+			<td>{{event.program}}</td>
+			<td>{{event.event_date}}</td>
+			<td><a href="edit_event/{{event.id}}" class="btn btn-default pull-right">Edit</a></td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock %}
