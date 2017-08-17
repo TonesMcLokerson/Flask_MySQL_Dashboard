@@ -1,11 +1,18 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 #from data import Articles
-from flask_mysqldb import MySQL 
-from wtforms import Form, StringField, TextAreaField, PasswordField, DateField, DateTimeField, IntegerField, validators
+from flask_mysqldb import MySQL
+from dateutil.parser import parse 
+from wtforms import Form, StringField, TextField, TextAreaField, PasswordField, DateField, DateTimeField, IntegerField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
 
 app = Flask(__name__)
+
+def get_resource_as_string(name, charset='utf-8'):
+    with app.open_resource(name) as f:
+        return f.read().decode(charset)
+
+app.jinja_env.globals['get_resource_as_string'] = get_resource_as_string
 
 # Config MySql
 app.config['MYSQL_HOST'] = 'localhost'
@@ -452,9 +459,9 @@ def event(id):
 # Event Form Class
 class EventForm(Form):
 	program = StringField( 'Program', [validators.Length(min=1, max=50)])
-	event_date = DateField( 'Date',format='%Y-%m-%d', validators=(validators.Optional(),))
-	event_time = TextAreaField( 'Start Time', validators=(validators.Optional(),))
-	end_time = TextAreaField( 'End Time', validators=(validators.Optional(),))  
+	event_date = TextField( 'Date', [validators.Length(min=1, max=50)])
+	s_time = TextField( 'Start Time', [validators.Length(min=0, max=50)])
+	e_time = TextField( 'End Time', [validators.Length(min=0, max=50)])  
 	account = StringField( 'Account Name', [validators.Length(min=1, max=50)])
 	sampler1 = StringField( 'Sampler', [validators.Length(min=1, max=50)])
 	sampler2 = StringField( 'Sampler', [validators.Length(min=1, max=50)])
@@ -469,8 +476,8 @@ def add_event():
 	if request.method == 'POST' and form.validate():
 		program = form.program.data
 		event_date = form.event_date.data
-		event_time = form.event_time.data
-		end_time = form.end_time.data
+		s_time = form.s_time.data
+		e_time = form.e_time.data
 		account = form.account.data
 		sampler1 = form.sampler1.data
 		sampler2 = form.sampler2.data
@@ -481,7 +488,7 @@ def add_event():
 		cur = mysql.connection.cursor()
 
 		# Execute query
-		cur.execute("INSERT INTO events(program, event_date, event_time, account, sampler1, sampler2, teamlead, comments) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",(program, event_date, event_time, account, sampler1, sampler2, teamlead, comments))
+		cur.execute("INSERT INTO events(program, event_date, s_time, e_time, account, sampler1, sampler2, teamlead, comments) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)",(program, event_date, s_time, e_time, account, sampler1, sampler2, teamlead, comments))
 		# Commit to DB
 		mysql.connection.commit()
 
@@ -513,8 +520,8 @@ def edit_event(id):
 	# Populate event form fields
 	form.program.data = event['program']
 	form.event_date.data = event['event_date']
-	form.event_time.data = event['event_time']
-	form.end_time.data = event['end_time']
+	form.s_time.data = event['s_time']
+	form.e_time.data = event['e_time']
 	form.account.data = event['account']
 	form.sampler1.data = event['sampler1']
 	form.sampler2.data = event['sampler2']
@@ -524,8 +531,8 @@ def edit_event(id):
 	if request.method == 'POST' and form.validate():
 		program = request.form['program']
 		event_date = request.form['event_date']
-		event_time = request.form['event_time']
-		end_time = request.form['end_time']
+		s_time = request.form['s_time']
+		e_time = request.form['e_time']
 		account = request.form['account']
 		sampler1 = request.form['sampler1']
 		sampler2 = request.form['sampler2']
@@ -536,7 +543,7 @@ def edit_event(id):
 		cur = mysql.connection.cursor()
 		app.logger.info(program)
         # Execute
-		cur.execute ("UPDATE events SET program = %s, event_date = %s, event_time = %s, end_time = %s, account = %s, sampler1 = %s, sampler2 = %s, teamlead = %s, comments = %s WHERE id = %s",(program, event_date, event_time, end_time, account, sampler1, sampler2, teamlead, comments, id))
+		cur.execute ("UPDATE events SET program = %s, event_date = %s, s_time = %s, e_time = %s, account = %s, sampler1 = %s, sampler2 = %s, teamlead = %s, comments = %s WHERE id = %s",(program, event_date, s_time, e_time, account, sampler1, sampler2, teamlead, comments, id))
         # Commit to DB
 		mysql.connection.commit()
 
@@ -548,6 +555,150 @@ def edit_event(id):
 		return redirect(url_for('events'))
 
 	return render_template('edit_event.html', form=form)
+
+# Managers
+@app.route('/managers')
+@is_logged_in
+def managers():
+    # Create cursor
+    cur = mysql.connection.cursor()
+
+    # Get articles
+    result = cur.execute("SELECT * FROM managers")
+
+    managers = cur.fetchall()
+
+    if result > 0:
+        return render_template('managers.html', managers=managers)
+    else:
+        msg = 'No Managers Found'
+        return render_template('managers.html', msg=msg)
+    # Close connection
+    cur.close()
+
+#Single Manager
+@app.route('/manager/<string:man_id>/')
+def manager(man_id):
+    # Create cursor
+    cur = mysql.connection.cursor()
+
+    # Get Employee
+    result = cur.execute("SELECT * FROM managers WHERE man_id = %s", [man_id])
+
+    manager = cur.fetchone()
+
+    return render_template('manager.html', manager=manager)
+
+# Manager Form Class
+class ManagerForm(Form):
+	fname = StringField( 'First Name', [validators.Length(min=1, max=50)])
+	lname = StringField( 'Last Name', [validators.Length(min=1, max=50)])
+	address = StringField( 'Address', [validators.Length(min=1, max=100)])
+	city = StringField( 'City', [validators.Length(min=1, max=50)])
+	state = StringField( 'State', [validators.Length(min=2, max=25)])
+	zipcode = StringField( 'Zip Code', [validators.Length(min=5, max=10)])
+	phonenumber = StringField( 'Phone Number', [validators.Length(min=1, max=12)])
+	email = StringField( 'Email', [validators.Length(min=6, max=100)])	
+
+# Add Manager
+@app.route('/add_manager', methods=['GET', 'POST'])
+@is_logged_in
+def add_manager():
+	form = ManagerForm(request.form)
+	if request.method == 'POST' and form.validate():
+		fname = form.fname.data
+		lname = form.lname.data
+		address = form.address.data 
+		city = form.city.data
+		state = form.state.data
+		zipcode = form.zipcode.data
+		phonenumber = form.phonenumber.data
+		email = form.email.data
+
+		# Create cursor
+		cur = mysql.connection.cursor()
+
+		# Execute query
+		cur.execute("INSERT INTO managers(fname, lname, address, city, state, zipcode, phonenumber, email) VALUES(%s, %s, %s, %s, %s, %s, %s, %s) ", (fname, lname, address, city, state, zipcode, phonenumber, email))
+
+		# Commit to DB
+		mysql.connection.commit()
+
+		# Close connection
+		cur.close()
+
+		flash("Manager Successflly Uploaded", 'success')
+
+		return redirect(url_for('dashboard'))
+
+	return render_template('add_manager.html', form=form)
+
+# Programs
+@app.route('/programs')
+@is_logged_in
+def programs():
+    # Create cursor
+    cur = mysql.connection.cursor()
+
+    # Get articles
+    result = cur.execute("SELECT * FROM programs")
+
+    programs = cur.fetchall()
+
+    if result > 0:
+        return render_template('programs.html', programs=programs)
+    else:
+        msg = 'No Programs Found'
+        return render_template('programs.html', msg=msg)
+    # Close connection
+    cur.close()
+
+#Single Program
+@app.route('/program/<string:prgm_id>/')
+def program(prgm_id):
+    # Create cursor
+    cur = mysql.connection.cursor()
+
+    # Get Program
+    result = cur.execute("SELECT * FROM programs WHERE prgm_id = %s", [prgm_id])
+
+    program = cur.fetchone()
+
+    return render_template('program.html', program=program)
+
+# Program Form Class
+class ProgramForm(Form):
+	name = StringField( 'Type', [validators.Length(min=1, max=50)])
+	brand = StringField( 'Brand', [validators.Length(min=1, max=50)])
+	spend = StringField( 'Spend', [validators.Length(min=1, max=100)])
+
+# Add Program
+@app.route('/add_program', methods=['GET', 'POST'])
+@is_logged_in
+def add_program():
+	form = ProgramForm(request.form)
+	if request.method == 'POST' and form.validate():
+		name = form.name.data
+		brand = form.brand.data
+		spend = form.spend.data 
+
+		# Create cursor
+		cur = mysql.connection.cursor()
+
+		# Execute query
+		cur.execute("INSERT INTO programs(name, brand, spend) VALUES(%s, %s, %s) ", (name, brand, spend))
+
+		# Commit to DB
+		mysql.connection.commit()
+
+		# Close connection
+		cur.close()
+
+		flash("Program Successflly Uploaded", 'success')
+
+		return redirect(url_for('programs'))
+
+	return render_template('add_program.html', form=form)
 
 if __name__ == '__main__':
 	app.secret_key = '5179'

@@ -1,2 +1,0 @@
-CREATE TABLE events(id INT(11) AUTO_INCREMENT PRIMARY KEY, program VARCHAR(25), event_date DATE, event_time TIME, account VARCHAR(100), sampler1 VARCHAR(50), sampler2 VARCHAR(50), teamlead VARCHAR(25), create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
-CREATE TABLE accounts(id INT(11) AUTO_INCREMENT PRIMARY KEY, accountname VARCHAR(50), accountaddress VARCHAR(75), accountcity VARCHAR(25), accountcomments TEXT);

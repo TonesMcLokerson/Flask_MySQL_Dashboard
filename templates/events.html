@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<div class="container">
   <h1>Events</h1>
   <a class="btn btn-success" href="/add_event">Add Event</a>
   <hr>
@@ -14,6 +15,7 @@
 			<th></th>
 		</tr>
 		{% for event in events %}
+		
 		<tr>
 			<td>{{event.id}}</td>
 			<td><a href="event/{{event.id}}">{{event.account}}</a></td>
@@ -23,4 +25,5 @@
 		</tr>
 		{% endfor %}
 	</table>
+</div>	
 {% endblock %}

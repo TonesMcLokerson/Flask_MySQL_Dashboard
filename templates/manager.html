@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>{{manager.fname}} {{manager.lname}}</h1>
+  <hr>
+  <div>
+    <h3>{{manager.address}}</h3>
+  </div>
+  <div>
+    <h3>{{manager.city}}, {{manager.state}} {{manager.zipcode}}</h3>
+  </div>
+  <div>
+    <h3>{{manager.phonenumber}} {{manager.email}} </h3>
+  </div>
+{% endblock %}

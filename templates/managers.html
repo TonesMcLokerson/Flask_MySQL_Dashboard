@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Managers</h1>
+  <a class="btn btn-success" href="/add_manager">Add Manager</a>
+  <hr>
+  <ul class="list-group">
+    {% for manager in managers %}
+      <li class="list-group-item"><a href="manager/{{manager.man_id}}">{{manager.fname}} {{manager.lname}}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

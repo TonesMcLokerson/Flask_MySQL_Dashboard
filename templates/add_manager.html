@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+	<h1>Add Manager</h1>
+	{% from "includes/_formhelpers.html" import render_field %}
+	<form method="POST" action="">
+		<div class="form-group">
+			{{render_field(form.fname, class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.lname, class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.address, class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.city, class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.state, class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.zipcode, class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.phonenumber, class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.email, class_="form-control")}}
+		</div>		
+		<p><input class="btn btn-primary" type="submit" value="Submit"></p>
+	</form>
+{% endblock %}

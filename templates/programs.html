@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Programs</h1>
+  <a class="btn btn-success" href="/add_program">Add Program</a>
+  <hr>
+  <ul class="list-group">
+    {% for program in programs %}
+      <li class="list-group-item"><a href="program/{{program.prgm_id}}">{{program.brand}} {{program.name}}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}
